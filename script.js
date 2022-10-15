@@ -48,24 +48,33 @@ const Module = (function() {
 
 const el = (selector) => document.querySelector(selector);
 
-const startScreen = (function () {
+const start = (function () {
     let player1 = {};
     let player2 = {};
-    let players = 0;
     const board = el(".board");
-    const xCharOne = el(".char.one");
-    const oCharTwo = el(".char.two")
+    const one = el(".one");
+    const two = el(".two");
+    const charSelect = el(".character-select");
+    const xChar = document.createElement('div');
+    xChar.classList.add('char', 'x')
+    const oChar = document.createElement('div');
+    oChar.classList.add('char', 'o');
     const display = el(".start-screen");
     const textDisplay = el(".text-display");
-    const cells = document.querySelectorAll(".cell");
-    xCharOne.addEventListener("click", () => {
+
+    function displayCharSelect() {
+        one.remove();
+        two.remove();
+        charSelect.appendChild(xChar);
+        charSelect.appendChild(oChar);
+    }
+    one.addEventListener("click", () => {
+        displayCharSelect();
         createPlayer(1);
-        players = 1;
-        
     })
-    oCharTwo.addEventListener("click", () => {
+    two.addEventListener("click", () => {
+        displayCharSelect();
         createPlayer(2);
-        players = 2;
     })
 
     const createPlayer = (players) => {
@@ -74,8 +83,8 @@ const startScreen = (function () {
         } else {
             textDisplay.textContent = `Choose your character`;
         }
-        addCharSelectFunction(xCharOne, 'x');
-        addCharSelectFunction(oCharTwo, 'o');
+        addCharSelectFunction(xChar, 'x');
+        addCharSelectFunction(oChar, 'o');
 
         function addCharSelectFunction(element, character) {
             element.textContent = "";
@@ -84,8 +93,7 @@ const startScreen = (function () {
                 if (players === 1) {
                     player1.char = character;
                     board.classList.add(character);
-                    initializeGame();
-
+                    gameBoard.initializeGame();
                 } else {
                     if (!player1.char) {
                         player1.char = character;
@@ -93,40 +101,57 @@ const startScreen = (function () {
                         textDisplay.textContent = `Player 2 \r\nChoose your character`;
                         element.style.cssText = "opacity: 0.1; cursor: not-allowed";
                     } else {
-                        player2.char = character;
-                        initializeGame();
+                        if (player1.char === character) {
+                            return
+                        } else {
+                            player2.char = character;
+                            gameBoard.initializeGame();
+                        }
                     }
                 }
             })
         }
-
-        function initializeGame() {
-            display.classList.add("hide");
-            setTimeout(() => {
-                display.remove();
-            }, 300)
-            cells.forEach((cell) => {
-                cell.addEventListener('click', () => {
-                    if (board.classList.contains('x')) {
-                    cell.classList.add(`x`);
-                    board.classList.remove('x');
-                    board.classList.add('o');
-                    } else if (board.classList.contains('o')) {
-                        cell.classList.add('o');
-                        board.classList.remove('x');
-                        board.classList.add('o');
-                    }
-
-                })
-            })
-        }
     };
-    return {player1, player2, players};
+    return { player1, player2, display, board };
 })();
 
 const gameBoard = (function () {
-    let p1 = startScreen.player1.char;
-    if (startScreen.players === 2) { 
-    let p2 = startScreen.player2;
+    start.player1.marks = [];
+    start.player2.marks = [];
+    let cellArray = [];
+    const cells = document.querySelectorAll(".cell");
+    function initializeGame() {
+        start.display.classList.add("hide");
+        setTimeout(() => {
+            start.display.remove();
+        }, 300)
+        cells.forEach((cell) => {
+            cellArray.push(cell);
+            cell.addEventListener('click', (e) => {
+                let place = cellArray.indexOf(cell);
+                if (cell.classList.contains('o') || cell.classList.contains('x')) return
+                if (start.board.classList.contains('x')) {
+                    cell.classList.add(`x`);
+                    trackMarks('x', place);
+                    start.board.classList.remove('x');
+                    start.board.classList.add('o');
+                } else if (start.board.classList.contains('o')) {
+                    cell.classList.add('o');
+                    trackMarks('o', place);
+                    start.board.classList.remove('o');
+                    start.board.classList.add('x');
+                }
+
+            })
+        })
     }
+    function trackMarks(char, spot) {
+        if (start.player1.char === char) {
+            start.player1.marks.push(spot);
+        } else {
+            start.player2.marks.push(spot);
+        }
+    }
+
+    return {initializeGame, cellArray}
 })();
