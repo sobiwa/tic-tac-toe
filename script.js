@@ -116,8 +116,10 @@ const start = (function () {
 })();
 
 const gameBoard = (function () {
-    let teamX = {marks: []};
-    let teamO = {marks: []};
+    let teamX = {marks: [],
+    character: 'X',};
+    let teamO = {marks: [],
+    character: 'O'};
     if (start.player1.char ==="x") {
         teamX.player = "player1";
         teamO.player = "player2";
@@ -136,41 +138,77 @@ const gameBoard = (function () {
             cell.addEventListener('click', (e) => {
                 let place = cellArray.indexOf(cell);
                 console.log(place);
-                if (cell.classList.contains('o') || cell.classList.contains('x')) return
+                if (cell.classList.contains('o') || cell.classList.contains('x')
+                || endGame.checkForWin.won) return
                 if (start.board.classList.contains('x')) {
                     cell.classList.add(`x`);
                     teamX.marks.push(place);
-                    checkForWin(teamX);
+                    endGame.checkForWin(teamX);
                     start.board.classList.remove('x');
                     start.board.classList.add('o');
                 } else if (start.board.classList.contains('o')) {
                     cell.classList.add('o');
                     teamO.marks.push(place);
-                    checkForWin(teamO);
+                    endGame.checkForWin(teamO);
                     start.board.classList.remove('o');
                     start.board.classList.add('x');
                 }
             })
         })
     }
+    return {initializeGame, cells, teamX, teamO}
+})();
+
+const endGame = (function() {
+    const cellContainer = document.querySelector('.cell-container');
+    const winDisplay = document.querySelector('.winDisplay');
+    const buttonContainer = document.createElement('div');
+    const playAgainButton = document.createElement('button');
+    playAgainButton.textContent = 'Play Again';
+    const characterSelectButton = document.createElement('button');
+    characterSelectButton.textContent = 'Character Select';
+    buttonContainer.append(playAgainButton, characterSelectButton);
+    let strike;
+
     function checkForWin(team) {
-        const winPossibilities = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        if (gameBoard.teamX.marks.length + gameBoard.teamO.marks.length === 9) {
+            winDisplay.textContent = 'Draw!';
+            winDisplay.appendChild(buttonContainer);
+        }
+        checkForWin.won = false;
+        const winPossibilities = [[0,3,6],[1,4,7],[2,5,8],[0,1,2],[3,4,5],[6,7,8],[0,4,8],[2,4,6]];
         function isIncluded(currentValue) {
             return team.marks.includes(currentValue);
         }
         for (let i = 0; i < winPossibilities.length; i++) {
             let check = winPossibilities[i];
             if (check.every(isIncluded)) {
-                winLine = winPossibilities[i];
-                alert("team wins!")
+                if (i > 2) {
+                    cellContainer.classList.add('rows');
+                }
+                strike = 'win' + i;
+                cellContainer.classList.add(strike);
+                checkForWin.won = true;
+                winDisplay.textContent = `${team.character} wins!`;
+                winDisplay.appendChild(buttonContainer);
             }
         }     
     }
-    return {initializeGame, cellArray,}
+
+    playAgainButton.addEventListener('click', () => {
+        buttonContainer.remove();
+        winDisplay.textContent = "";
+        cellContainer.classList.remove(strike);
+        checkForWin.won = false;
+        gameBoard.cells.forEach((cell) => {
+            cell.classList.remove("x");
+            cell.classList.remove("o");
+        })
+        gameBoard.teamX.marks = [];
+        gameBoard.teamO.marks = [];
+    })
+
+
+    return {checkForWin}
+
 })();
-
-cellContainer = document.querySelector('.cell-container');
-
-document.addEventListener('click', () => {
-    cellContainer.classList.toggle('win6');
-})
