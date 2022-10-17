@@ -116,8 +116,6 @@ const start = (function () {
 })();
 
 const gameBoard = (function () {
-    // start.player1.marks = [];
-    // start.player2.marks = [];
     let teamX = {marks: []};
     let teamO = {marks: []};
     if (start.player1.char ==="x") {
@@ -163,9 +161,16 @@ const gameBoard = (function () {
         for (let i = 0; i < winPossibilities.length; i++) {
             let check = winPossibilities[i];
             if (check.every(isIncluded)) {
+                winLine = winPossibilities[i];
                 alert("team wins!")
             }
         }     
     }
     return {initializeGame, cellArray,}
 })();
+
+cellContainer = document.querySelector('.cell-container');
+
+document.addEventListener('click', () => {
+    cellContainer.classList.toggle('win6');
+})
