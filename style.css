@@ -96,12 +96,19 @@ body {
     background-color: var(--background);
     height: 100vh;
     width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell-container {
+    grid-template-columns: repeat(3, auto);
+    position: relative;
     display: grid;
     justify-content: center;
     align-content: center;
     justify-items: center;
     align-items: center;
-    grid-template-columns: repeat(3, auto);
 }
 
 .cell {
@@ -214,4 +221,8 @@ body {
 
 .char.o::after {
     background-color: var(--start-screen-bg);
+}
+
+.board.win1::after {
+    
 }

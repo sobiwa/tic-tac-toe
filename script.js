@@ -116,42 +116,56 @@ const start = (function () {
 })();
 
 const gameBoard = (function () {
-    start.player1.marks = [];
-    start.player2.marks = [];
-    let cellArray = [];
+    // start.player1.marks = [];
+    // start.player2.marks = [];
+    let teamX = {marks: []};
+    let teamO = {marks: []};
+    if (start.player1.char ==="x") {
+        teamX.player = "player1";
+        teamO.player = "player2";
+    } else {
+        teamX.player = "player2";
+        teamO.player = "player1";
+    }
     const cells = document.querySelectorAll(".cell");
+    const cellArray = Array.from(cells);
     function initializeGame() {
         start.display.classList.add("hide");
         setTimeout(() => {
             start.display.remove();
         }, 300)
         cells.forEach((cell) => {
-            cellArray.push(cell);
             cell.addEventListener('click', (e) => {
                 let place = cellArray.indexOf(cell);
+                console.log(place);
                 if (cell.classList.contains('o') || cell.classList.contains('x')) return
                 if (start.board.classList.contains('x')) {
                     cell.classList.add(`x`);
-                    trackMarks('x', place);
+                    teamX.marks.push(place);
+                    checkForWin(teamX);
                     start.board.classList.remove('x');
                     start.board.classList.add('o');
                 } else if (start.board.classList.contains('o')) {
                     cell.classList.add('o');
-                    trackMarks('o', place);
+                    teamO.marks.push(place);
+                    checkForWin(teamO);
                     start.board.classList.remove('o');
                     start.board.classList.add('x');
                 }
-
             })
         })
     }
-    function trackMarks(char, spot) {
-        if (start.player1.char === char) {
-            start.player1.marks.push(spot);
-        } else {
-            start.player2.marks.push(spot);
+    function checkForWin(team) {
+        const winPossibilities = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        function isIncluded(currentValue) {
+            return team.marks.includes(currentValue);
         }
+        for (let i = 0; i < winPossibilities.length; i++) {
+            let check = winPossibilities[i];
+            if (check.every(isIncluded)) {
+                alert("team wins!")
+            }
+        }     
     }
-
-    return {initializeGame, cellArray}
+    return {initializeGame, cellArray,}
 })();
