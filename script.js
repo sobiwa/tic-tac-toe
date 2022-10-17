@@ -116,11 +116,16 @@ const start = (function () {
 })();
 
 const gameBoard = (function () {
-    let teamX = {marks: [],
-    character: 'X',};
-    let teamO = {marks: [],
-    character: 'O'};
-    if (start.player1.char ==="x") {
+    let count = {};
+    let teamX = {
+        marks: [],
+        character: 'X',
+    };
+    let teamO = {
+        marks: [],
+        character: 'O'
+    };
+    if (start.player1.char === "x") {
         teamX.player = "player1";
         teamO.player = "player2";
     } else {
@@ -139,11 +144,12 @@ const gameBoard = (function () {
                 let place = cellArray.indexOf(cell);
                 console.log(place);
                 if (cell.classList.contains('o') || cell.classList.contains('x')
-                || endGame.checkForWin.won) return
+                    || endGame.checkForWin.won) return
                 if (start.board.classList.contains('x')) {
                     cell.classList.add(`x`);
                     teamX.marks.push(place);
                     endGame.checkForWin(teamX);
+                    computerMove(teamX);
                     start.board.classList.remove('x');
                     start.board.classList.add('o');
                 } else if (start.board.classList.contains('o')) {
@@ -156,10 +162,26 @@ const gameBoard = (function () {
             })
         })
     }
-    return {initializeGame, cells, teamX, teamO}
+
+    function computerMove(team) {
+        let options = [];
+        const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
+        for (let i = 0; i < winPossibilities.length; i++) {
+            let currentWinPossibility = winPossibilities[i];
+            count[i] = 0;
+            for (let o = 0; o < currentWinPossibility.length; o++) {
+                for (let p = 0; p < team.marks.length; p++) {
+                    if (team.marks[p] === currentWinPossibility[o]) {
+                        count[i] += 1;
+                    }
+                }
+            }
+        }
+    }
+    return { initializeGame, cells, teamX, teamO, count }
 })();
 
-const endGame = (function() {
+const endGame = (function () {
     const cellContainer = document.querySelector('.cell-container');
     const winDisplay = document.querySelector('.winDisplay');
     const buttonContainer = document.createElement('div');
@@ -176,7 +198,7 @@ const endGame = (function() {
             winDisplay.appendChild(buttonContainer);
         }
         checkForWin.won = false;
-        const winPossibilities = [[0,3,6],[1,4,7],[2,5,8],[0,1,2],[3,4,5],[6,7,8],[0,4,8],[2,4,6]];
+        const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
         function isIncluded(currentValue) {
             return team.marks.includes(currentValue);
         }
@@ -192,23 +214,25 @@ const endGame = (function() {
                 winDisplay.textContent = `${team.character} wins!`;
                 winDisplay.appendChild(buttonContainer);
             }
-        }     
+        }
     }
 
-    playAgainButton.addEventListener('click', () => {
+    playAgainButton.addEventListener('click', reset);
+
+    characterSelectButton.addEventListener('click', () => {
+        location.reload();
+    })
+
+    function reset() {
         buttonContainer.remove();
         winDisplay.textContent = "";
-        cellContainer.classList.remove(strike);
+        cellContainer.classList.remove(strike, "rows");
         checkForWin.won = false;
         gameBoard.cells.forEach((cell) => {
-            cell.classList.remove("x");
-            cell.classList.remove("o");
+            cell.classList.remove("x", "o");
         })
         gameBoard.teamX.marks = [];
         gameBoard.teamO.marks = [];
-    })
-
-
-    return {checkForWin}
-
+    }
+    return { checkForWin }
 })();
