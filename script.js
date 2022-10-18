@@ -50,7 +50,7 @@ const el = (selector) => document.querySelector(selector);
 
 const start = (function () {
     let player1 = {};
-    let player2 = {};
+    let player2 = { bot: true };
     const board = el(".board");
     const one = el(".one");
     const two = el(".two");
@@ -79,6 +79,7 @@ const start = (function () {
 
     const createPlayer = (players) => {
         if (players === 2) {
+            player2.bot = false;
             textDisplay.innerText = `Player 1\nChoose your character`;
         } else {
             textDisplay.textContent = `Choose your character`;
@@ -116,14 +117,15 @@ const start = (function () {
 })();
 
 const gameBoard = (function () {
-    let count = {};
     let teamX = {
+        character: 'x',
         marks: [],
-        character: 'X',
+        count: {},
     };
     let teamO = {
+        character: 'o',
         marks: [],
-        character: 'O'
+        count: {},
     };
     if (start.player1.char === "x") {
         teamX.player = "player1";
@@ -145,40 +147,111 @@ const gameBoard = (function () {
                 console.log(place);
                 if (cell.classList.contains('o') || cell.classList.contains('x')
                     || endGame.checkForWin.won) return
-                if (start.board.classList.contains('x')) {
-                    cell.classList.add(`x`);
-                    teamX.marks.push(place);
-                    endGame.checkForWin(teamX);
-                    computerMove(teamX);
-                    start.board.classList.remove('x');
-                    start.board.classList.add('o');
-                } else if (start.board.classList.contains('o')) {
-                    cell.classList.add('o');
-                    teamO.marks.push(place);
-                    endGame.checkForWin(teamO);
-                    start.board.classList.remove('o');
-                    start.board.classList.add('x');
+                //
+                if (start.player2.bot) {
+                    if (start.player1.char === "x") {
+                        makeMarks(cell, teamX, place);
+                        let compMove = bot.computerMove(teamO, teamX);
+                        cellArray[compMove[0][0]].classList.add('o');
+                        teamO.marks.push(compMove[0][0]);
+                        endGame.checkForWin(teamO);
+                    } else {
+                        makeMarks(cell, teamO, place);
+                        let compMove = bot.computerMove(teamX, teamO);
+                        cellArray[compMove[0][0]].classList.add('x');
+                        teamX.marks.push(compMove[0][0]);
+                        endGame.checkForWin(teamX);
+                    }
+                }
+                //
+                else {
+                    if (start.board.classList.contains('x')) {
+                        makeMarks(cell, teamX, place);
+                        switchTurns(teamX, teamO);
+                    } else if (start.board.classList.contains('o')) {
+                        makeMarks(cell, teamO, place);
+                        switchTurns(teamO, teamX);
+                    }
                 }
             })
         })
     }
 
-    function computerMove(team) {
+    function makeMarks(cell, team, place) {
+        cell.classList.add(team.character);
+        team.marks.push(place);
+        endGame.checkForWin(team);
+    }
+    function switchTurns(team, oppTeam) {
+        start.board.classList.remove(team.character);
+        start.board.classList.add(oppTeam.character);
+    }
+    return { initializeGame, cells, teamX, teamO, }
+})();
+
+const bot = (function () {
+    const spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    function computerMove(team, otherTeam) {
         let options = [];
+        let allOpenSpaces = findOpenSpaces(spaces, team.marks, otherTeam.marks);
         const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
         for (let i = 0; i < winPossibilities.length; i++) {
             let currentWinPossibility = winPossibilities[i];
-            count[i] = 0;
+            team.count[i] = [];
+            otherTeam.count[i] = [];
             for (let o = 0; o < currentWinPossibility.length; o++) {
                 for (let p = 0; p < team.marks.length; p++) {
                     if (team.marks[p] === currentWinPossibility[o]) {
-                        count[i] += 1;
+                        team.count[i].push(currentWinPossibility[o]);
+                    }
+                }
+                for (let q = 0; q < otherTeam.marks.length; q++) {
+                    if (otherTeam.marks[q] === currentWinPossibility[o]) {
+                        otherTeam.count[i].push(currentWinPossibility[o]);
                     }
                 }
             }
         }
+        win:
+        for (let u = 0; u < winPossibilities.length; u++) {
+            let openSpaces = findOpenSpaces(winPossibilities[u], team.marks, otherTeam.marks);
+            if (team.count[u].length > 1) {
+                if (openSpaces.length) {
+                    options.unshift(openSpaces);
+                    break win;
+                }
+            } else if (otherTeam.count[u].length > 1) {
+                if (openSpaces.length) {
+                    options.unshift(openSpaces);
+                }
+            }
+        }
+        if (!options.length) {
+            if (allOpenSpaces.includes(4)) {
+                options.push([4]);
+            } else if (allOpenSpaces.includes(0)) {
+                options.push([0]);
+            } else if (allOpenSpaces.includes(2)) {
+                options.push([2]);
+            } else if (allOpenSpaces.includes(6)) {
+                options.push([6]);
+            } else if (allOpenSpaces.includes(8)) {
+                options.push([8]);
+            }
+        }
+        return options;
     }
-    return { initializeGame, cells, teamX, teamO, count }
+    function findOpenSpaces(spacesForWin, spacesWeUse, spacesOppUses) {
+        let openSpaces = [];
+        for (let t = 0; t < spacesForWin.length; t++) {
+            if (!spacesWeUse.includes(spacesForWin[t]) &&
+                !spacesOppUses.includes(spacesForWin[t])) {
+                openSpaces.push(spacesForWin[t])
+            }
+        }
+        return openSpaces;
+    }
+    return { computerMove };
 })();
 
 const endGame = (function () {
@@ -211,7 +284,7 @@ const endGame = (function () {
                 strike = 'win' + i;
                 cellContainer.classList.add(strike);
                 checkForWin.won = true;
-                winDisplay.textContent = `${team.character} wins!`;
+                winDisplay.textContent = `${team.character.toUpperCase()} wins!`;
                 winDisplay.appendChild(buttonContainer);
             }
         }
