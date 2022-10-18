@@ -229,15 +229,11 @@ const bot = (function () {
         if (!options.length) {
             if (allOpenSpaces.includes(4)) {
                 options.push([4]);
-            } else if (allOpenSpaces.includes(0)) {
-                options.push([0]);
-            } else if (allOpenSpaces.includes(2)) {
-                options.push([2]);
-            } else if (allOpenSpaces.includes(6)) {
-                options.push([6]);
-            } else if (allOpenSpaces.includes(8)) {
-                options.push([8]);
+            } else {
+                let randomSpace = allOpenSpaces[Math.floor(Math.random() * allOpenSpaces.length)];
+                options.push([randomSpace]);
             }
+
         }
         return options;
     }
@@ -299,7 +295,11 @@ const endGame = (function () {
     function reset() {
         buttonContainer.remove();
         winDisplay.textContent = "";
-        cellContainer.classList.remove(strike, "rows");
+        cellContainer.classList.remove("rows");
+        for (let i = 0; i < 8; i++) {
+            let classS = "win" + i;
+            cellContainer.classList.remove(classS);
+        }
         checkForWin.won = false;
         gameBoard.cells.forEach((cell) => {
             cell.classList.remove("x", "o");
