@@ -79,7 +79,7 @@ const start = (function () {
 
     const createPlayer = (players) => {
         if (players === 2) {
-            textDisplay.textContent = `Player 1 \r\nChoose your character`;
+            textDisplay.innerText = `Player 1\nChoose your character`;
         } else {
             textDisplay.textContent = `Choose your character`;
         }
@@ -98,7 +98,7 @@ const start = (function () {
                     if (!player1.char) {
                         player1.char = character;
                         board.classList.add(character);
-                        textDisplay.textContent = `Player 2 \r\nChoose your character`;
+                        textDisplay.innerText = `Player 2\nChoose your character`;
                         element.style.cssText = "opacity: 0.1; cursor: not-allowed";
                     } else {
                         if (player1.char === character) {

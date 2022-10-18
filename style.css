@@ -1,7 +1,9 @@
 @font-face {
     font-family: 'main-font';
-    src: url("/fonts/anticslab-regular-webfont.woff2") format("woff2"),
-    url("/fonts/anticslab-regular-webfont.woff") format("woff");
+    src: url("./fonts/anticslab-regular-webfont.woff2") format("woff2"),
+    url("./fonts/anticslab-regular-webfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
 }
 
 :root {
@@ -46,8 +48,8 @@ body {
 }
 
 .text-display {
-    white-space: pre;
-    text-align: center;  
+    text-align: center;
+    max-width: 90%; 
 }
 
 .hide {
@@ -142,6 +144,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
 .cell-container {
