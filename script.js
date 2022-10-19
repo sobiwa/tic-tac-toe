@@ -293,6 +293,7 @@ const endGame = (function () {
                 checkForWin.won = true;
                 winDisplay.textContent = `${team.character.toUpperCase()} wins!`;
                 winDisplay.appendChild(buttonContainer);
+                break;
             }
         }
     }
