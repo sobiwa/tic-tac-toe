@@ -195,9 +195,13 @@ const gameBoard = (function () {
 
 const bot = (function () {
     const spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    const cornerSpaces = [0, 2, 6, 8];
+    const middleSpaces = [1, 3, 5, 7];
     function computerMove(team, otherTeam) {
         let options = [];
         let allOpenSpaces = findOpenSpaces(spaces, team.marks, otherTeam.marks);
+        let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
+        let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
         const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
         for (let i = 0; i < winPossibilities.length; i++) {
             let currentWinPossibility = winPossibilities[i];
@@ -233,7 +237,15 @@ const bot = (function () {
         if (!options.length) {
             if (allOpenSpaces.includes(4)) {
                 options.push([4]);
-            } else {
+            } else if (otherTeam.marks.includes(4) && openCorners.length) {
+                let randomCornerSpace = openCorners[Math.floor(Math.random() * openCorners.length)];
+                options.push([randomCornerSpace]);
+            } else if ((otherTeam.marks.includes(0) && otherTeam.marks.includes(8)) ||
+            (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
+                let randomMiddleSpace = openMiddles[Math.floor(Math.random() * openMiddles.length)];
+                options.push([randomMiddleSpace]);
+            }
+            else {
                 let randomSpace = allOpenSpaces[Math.floor(Math.random() * allOpenSpaces.length)];
                 options.push([randomSpace]);
             }
