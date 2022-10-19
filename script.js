@@ -1,6 +1,4 @@
 /* 
-Choose your character
-
 Rule of thumb: 
 if you only ever need ONE of something
 use a module,
@@ -40,12 +38,6 @@ const Module = (function() {
 })();
 
 */
-
-// const createPlayer = (char) => {
-//     return { char };
-// }
-
-
 const el = (selector) => document.querySelector(selector);
 
 const start = (function () {
@@ -84,35 +76,33 @@ const start = (function () {
         } else {
             textDisplay.textContent = `Choose your character`;
         }
-        addCharSelectFunction(xChar, 'x');
-        addCharSelectFunction(oChar, 'o');
+        addCharSelectFunction(xChar, 'x', players);
+        addCharSelectFunction(oChar, 'o', players);
 
-        function addCharSelectFunction(element, character) {
-            element.textContent = "";
-            element.classList.add(character);
-            element.addEventListener("click", () => {
-                if (players === 1) {
+    };
+    function addCharSelectFunction(element, character, players) {
+        element.addEventListener("click", () => {
+            if (players === 1) {
+                player1.char = character;
+                board.classList.add(character);
+                gameBoard.initializeGame();
+            } else {
+                if (!player1.char) {
                     player1.char = character;
                     board.classList.add(character);
-                    gameBoard.initializeGame();
+                    textDisplay.innerText = `Player 2\nChoose your character`;
+                    element.style.cssText = "opacity: 0.1; cursor: not-allowed";
                 } else {
-                    if (!player1.char) {
-                        player1.char = character;
-                        board.classList.add(character);
-                        textDisplay.innerText = `Player 2\nChoose your character`;
-                        element.style.cssText = "opacity: 0.1; cursor: not-allowed";
+                    if (player1.char === character) {
+                        return
                     } else {
-                        if (player1.char === character) {
-                            return
-                        } else {
-                            player2.char = character;
-                            gameBoard.initializeGame();
-                        }
+                        player2.char = character;
+                        gameBoard.initializeGame();
                     }
                 }
-            })
-        }
-    };
+            }
+        })
+    }
     return { player1, player2, display, board };
 })();
 
@@ -271,10 +261,15 @@ const endGame = (function () {
     const winDisplay = document.querySelector('.winDisplay');
     const buttonContainer = document.createElement('div');
     const playAgainButton = document.createElement('button');
+    playAgainButton.addEventListener('click', reset);
     playAgainButton.textContent = 'Play Again';
     const characterSelectButton = document.createElement('button');
+    characterSelectButton.addEventListener('click', () => {
+        location.reload();
+    })
     characterSelectButton.textContent = 'Character Select';
     buttonContainer.append(playAgainButton, characterSelectButton);
+    const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
     let strike;
 
     function checkForWin(team) {
@@ -283,8 +278,7 @@ const endGame = (function () {
             winDisplay.textContent = 'Draw!';
             checkForWin.won = true;
             winDisplay.appendChild(buttonContainer);
-        }
-        const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
+        } 
         function isIncluded(currentValue) {
             return team.marks.includes(currentValue);
         }
@@ -302,12 +296,6 @@ const endGame = (function () {
             }
         }
     }
-
-    playAgainButton.addEventListener('click', reset);
-
-    characterSelectButton.addEventListener('click', () => {
-        location.reload();
-    })
 
     function reset() {
         buttonContainer.remove();
