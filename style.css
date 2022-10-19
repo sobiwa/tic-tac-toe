@@ -285,17 +285,13 @@ body {
     content: '';
     position: absolute;
     background-color: var(--plain);
-    width: 3px;
+    width: 4px;
     border-radius: 10px;
     height: 100%;
 }
 .cell-container.win0::after {
     scale: 1;
     left: calc(var(--cell-size) / 2);
-}
-
-.cell-container.win1::after {
-    scale: 1;
 }
 
 .cell-container.win2::after {
@@ -326,17 +322,34 @@ body {
     transform-origin: left;
 }
 
-
-.cell-container.win6::after {
-    top: 20px;
-    left: 20px;
-    transform: rotate(45deg);
-    scale: 1.2;
-}
-
 .cell-container.win7::after {
     bottom: 20px;
     left: 20px;
     transform: rotate(-45deg);
     scale: 1.2;
+}
+
+.cell-container::before {
+    scale: 0;
+    transition: scale 0.5s;
+    transform-origin: top;
+    content: '';
+    position: absolute;
+    background-color: var(--plain);
+    width: 4px;
+    border-radius: 10px;
+    height: 100%;
+}
+
+.cell-container.win1::before {
+    scale: 1;
+    z-index: 1;
+}
+
+.cell-container.win6::before {
+    top: 20px;
+    left: 20px;
+    transform: rotate(-45deg);
+    scale: 1.2;
+    z-index: 1;
 }
