@@ -257,6 +257,9 @@ const bot = (function () {
 })();
 
 const endGame = (function () {
+    const shoutOut = document.createElement('div');
+    shoutOut.innerText = '@fiufiu win!'
+    shoutOut.style.cssText = 'position: absolute; width: 200px; bottom: 50px; right: 0; left: 0; margin-right: auto; margin-left: auto;';
     const cellContainer = document.querySelector('.cell-container');
     const winDisplay = document.querySelector('.winDisplay');
     const buttonContainer = document.createElement('div');
@@ -282,6 +285,7 @@ const endGame = (function () {
         function isIncluded(currentValue) {
             return team.marks.includes(currentValue);
         }
+        let winCount = 0;
         for (let i = 0; i < winPossibilities.length; i++) {
             let check = winPossibilities[i];
             if (check.every(isIncluded)) {
@@ -293,11 +297,16 @@ const endGame = (function () {
                 checkForWin.won = true;
                 winDisplay.textContent = `${team.character.toUpperCase()} wins!`;
                 winDisplay.appendChild(buttonContainer);
+                winCount++;
+            }
+            if (winCount > 1) {
+                start.board.appendChild(shoutOut);
             }
         }
     }
 
     function reset() {
+        shoutOut.remove();
         buttonContainer.remove();
         winDisplay.textContent = "";
         cellContainer.classList.remove("rows");
