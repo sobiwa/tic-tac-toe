@@ -259,7 +259,8 @@ const bot = (function () {
 const endGame = (function () {
     const shoutOut = document.createElement('div');
     shoutOut.innerText = '@fiufiu win!'
-    shoutOut.style.cssText = 'position: absolute; width: 200px; bottom: 50px; right: 0; left: 0; margin-right: auto; margin-left: auto;';
+    shoutOut.style.cssText = 'scale: 0; transition: 0.5s; position: absolute; width: 200px; bottom: 50px; right: 0; left: 0; margin-right: auto; margin-left: auto;';
+    start.board.appendChild(shoutOut);
     const cellContainer = document.querySelector('.cell-container');
     const winDisplay = document.querySelector('.winDisplay');
     const buttonContainer = document.createElement('div');
@@ -300,13 +301,13 @@ const endGame = (function () {
                 winCount++;
             }
             if (winCount > 1) {
-                start.board.appendChild(shoutOut);
+                shoutOut.style.scale = '1';
             }
         }
     }
 
     function reset() {
-        shoutOut.remove();
+        shoutOut.style.scale = '0';
         buttonContainer.remove();
         winDisplay.textContent = "";
         cellContainer.classList.remove("rows");
