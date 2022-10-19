@@ -151,16 +151,20 @@ const gameBoard = (function () {
                 if (start.player2.bot) {
                     if (start.player1.char === "x") {
                         makeMarks(cell, teamX, place);
-                        let compMove = bot.computerMove(teamO, teamX);
-                        cellArray[compMove[0][0]].classList.add('o');
-                        teamO.marks.push(compMove[0][0]);
-                        endGame.checkForWin(teamO);
+                        if (!endGame.checkForWin.won) {
+                            let compMove = bot.computerMove(teamO, teamX);
+                            cellArray[compMove[0][0]].classList.add('o');
+                            teamO.marks.push(compMove[0][0]);
+                            endGame.checkForWin(teamO);
+                        }
                     } else {
                         makeMarks(cell, teamO, place);
-                        let compMove = bot.computerMove(teamX, teamO);
-                        cellArray[compMove[0][0]].classList.add('x');
-                        teamX.marks.push(compMove[0][0]);
-                        endGame.checkForWin(teamX);
+                        if (!endGame.checkForWin.won) {
+                            let compMove = bot.computerMove(teamX, teamO);
+                            cellArray[compMove[0][0]].classList.add('x');
+                            teamX.marks.push(compMove[0][0]);
+                            endGame.checkForWin(teamX);
+                        }
                     }
                 }
                 //
@@ -262,11 +266,12 @@ const endGame = (function () {
     let strike;
 
     function checkForWin(team) {
+        checkForWin.won = false;
         if (gameBoard.teamX.marks.length + gameBoard.teamO.marks.length === 9) {
             winDisplay.textContent = 'Draw!';
+            checkForWin.won = true;
             winDisplay.appendChild(buttonContainer);
         }
-        checkForWin.won = false;
         const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
         function isIncluded(currentValue) {
             return team.marks.includes(currentValue);

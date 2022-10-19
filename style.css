@@ -184,6 +184,11 @@ body {
     border-bottom: none;
 }
 
+/* .cell.o::before,
+.cell.x::after {
+    scale: 0;
+} */
+
 
 .cell.x::before,
 .cell.x::after,
@@ -194,6 +199,8 @@ body {
     height: var(--mark-size);
     width: calc(var(--mark-size) * 0.1);
     background-color: var(--green);
+    scale: 1;
+    transition: 0.3s;
 }
 
 .cell.x::before,
@@ -213,6 +220,8 @@ body {
     content: '';
     position: absolute;
     border-radius: 50%;
+    scale: 1;
+    transition: 0.3s;
 }
 
 .cell.o::before,
