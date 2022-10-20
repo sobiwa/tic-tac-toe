@@ -73,9 +73,18 @@ body {
     justify-content: center;
     border-radius: 10%;
     cursor: pointer;
+    transition: 0.3s;
+    font-size: 5rem;
 }
 
-.char:active {
+.one:hover,
+.two:hover {
+    transform: scale(1.2);
+}
+
+.char:active,
+.one:active,
+.two:active {
     transform: scale(0.9);
 }
 
