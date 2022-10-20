@@ -134,7 +134,6 @@ const gameBoard = (function () {
         cells.forEach((cell) => {
             cell.addEventListener('click', (e) => {
                 let place = cellArray.indexOf(cell);
-                console.log(place);
                 if (cell.classList.contains('o') || cell.classList.contains('x')
                     || endGame.checkForWin.won) return
                 //
@@ -194,7 +193,9 @@ const bot = (function () {
         let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
         let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
         const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
+        win:
         for (let i = 0; i < winPossibilities.length; i++) {
+            let openSpaces = findOpenSpaces(winPossibilities[i], team.marks, otherTeam.marks);
             let currentWinPossibility = winPossibilities[i];
             team.count[i] = [];
             otherTeam.count[i] = [];
@@ -210,23 +211,19 @@ const bot = (function () {
                     }
                 }
             }
-        }
-        win:
-        for (let u = 0; u < winPossibilities.length; u++) {
-            let openSpaces = findOpenSpaces(winPossibilities[u], team.marks, otherTeam.marks);
-            if (team.count[u].length > 1) {
+            if (team.count[i].length > 1) {
                 if (openSpaces.length) {
                     options.unshift(openSpaces);
                     break win;
                 }
-            } else if (otherTeam.count[u].length > 1) {
+            } else if (otherTeam.count[i].length > 1) {
                 if (openSpaces.length) {
                     options.unshift(openSpaces);
                 }
             } else if (openSpaces.length > 1 &&
-                team.count[u].some(item => winPossibilities[u].includes(item))) {
-                strategicStartingOptions.push(openSpaces);
-            }
+                team.count[i].some(item => winPossibilities[i].includes(item))) {
+                    strategicStartingOptions.push(openSpaces);
+                }       
         }
         if (!options.length) {
             let choice;
