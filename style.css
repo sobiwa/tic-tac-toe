@@ -148,7 +148,7 @@ body {
     margin-left: auto;
     margin-right: auto;
     width: min-content;
-    top: calc(50vh + ((var(--cell-size) * 3) / 2));
+    top: calc(54vh + ((var(--cell-size) * 3) / 2));
 }
 
 .buttons > div {
