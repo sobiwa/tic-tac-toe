@@ -289,7 +289,7 @@ const bot = (function () {
 const endGame = (function () {
     const shoutOut = document.createElement('div');
     shoutOut.innerText = '@fiufiu win!'
-    shoutOut.style.cssText = 'scale: 0; transition: 0.5s; position: absolute; width: 200px; bottom: 50px; right: 0; left: 0; margin-right: auto; margin-left: auto;';
+    shoutOut.classList.add('shout-out');
     start.board.appendChild(shoutOut);
     const cellContainer = document.querySelector('.cell-container');
     const winDisplay = document.querySelector('.message');
@@ -333,9 +333,9 @@ const endGame = (function () {
                 buttonDisplay.appendChild(buttonContainer);
                 winCount++;
             }
-            if (winCount > 1) {
-                shoutOut.style.scale = '1';
-            }
+        }
+        if (winCount > 1) {
+            shoutOut.style.scale = '1';
         }
     }
 
