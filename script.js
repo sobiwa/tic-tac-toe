@@ -222,18 +222,19 @@ const bot = (function () {
             } else if (otherTeam.count[i].length > 1 && openSpaces.length) {
                 options.unshift(openSpaces);
             } else {
-                //finds spots bot could use for win
+                //find spots bot could use for win
                 if (openSpaces.length > 1 &&
                     team.count[i].some(item => currentWinPossibility.includes(item))) {
                     strategicStartingOptions.push(openSpaces);
                 }
-                //finds spots other team could use
+                //find spots other team could use
                 if (otherTeam.marks.some(item => currentWinPossibility.includes(item)) &&
                     !team.marks.some(item => currentWinPossibility.includes(item))) {
                     otherTeamSpotsBlock.push(openSpaces);
                 }
             }
         }
+        //compare arrays made above^ for optimal spots
         for (let u = 0; u < strategicStartingOptions.length; u++) {
             for (let o = 0; o < otherTeamSpotsBlock.length; o++) {
                 for (let y = 0; y < otherTeamSpotsBlock[o].length; y++) {
@@ -245,9 +246,6 @@ const bot = (function () {
             }
 
         }
-        console.log(strategicStartingOptions);
-        console.log(otherTeamSpotsBlock);
-        console.log(offAndDef);
         if (!options.length) {
             let choice;
             if (allOpenSpaces.includes(4)) {
@@ -294,7 +292,9 @@ const endGame = (function () {
     shoutOut.style.cssText = 'scale: 0; transition: 0.5s; position: absolute; width: 200px; bottom: 50px; right: 0; left: 0; margin-right: auto; margin-left: auto;';
     start.board.appendChild(shoutOut);
     const cellContainer = document.querySelector('.cell-container');
-    const winDisplay = document.querySelector('.winDisplay');
+    const winDisplay = document.querySelector('.message');
+    const winningCharacter = document.querySelector('.winning-character');
+    const buttonDisplay = document.querySelector('.buttons')
     const buttonContainer = document.createElement('div');
     const playAgainButton = document.createElement('button');
     playAgainButton.addEventListener('click', reset);
@@ -313,7 +313,7 @@ const endGame = (function () {
         if (gameBoard.teamX.marks.length + gameBoard.teamO.marks.length === 9) {
             winDisplay.textContent = 'Draw!';
             checkForWin.won = true;
-            winDisplay.appendChild(buttonContainer);
+            buttonDisplay.appendChild(buttonContainer);
         }
         function isIncluded(currentValue) {
             return team.marks.includes(currentValue);
@@ -328,8 +328,9 @@ const endGame = (function () {
                 strike = 'win' + i;
                 cellContainer.classList.add(strike);
                 checkForWin.won = true;
-                winDisplay.textContent = `${team.character.toUpperCase()} wins!`;
-                winDisplay.appendChild(buttonContainer);
+                winningCharacter.classList.add(team.character);
+                winDisplay.textContent = `wins!`;
+                buttonDisplay.appendChild(buttonContainer);
                 winCount++;
             }
             if (winCount > 1) {
@@ -342,6 +343,7 @@ const endGame = (function () {
         shoutOut.style.scale = '0';
         buttonContainer.remove();
         winDisplay.textContent = "";
+        winningCharacter.classList.remove("x", "o");
         cellContainer.classList.remove("rows");
         for (let i = 0; i < 8; i++) {
             let classS = "win" + i;
