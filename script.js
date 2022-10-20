@@ -189,6 +189,8 @@ const bot = (function () {
     function computerMove(team, otherTeam) {
         let options = [];
         let strategicStartingOptions = [];
+        let otherTeamSpotsBlock = [];
+        let offAndDef = [];
         let allOpenSpaces = findOpenSpaces(spaces, team.marks, otherTeam.marks);
         let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
         let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
@@ -205,26 +207,47 @@ const bot = (function () {
                         team.count[i].push(currentWinPossibility[o]);
                     }
                 }
-                for (let q = 0; q < otherTeam.marks.length; q++) {
-                    if (otherTeam.marks[q] === currentWinPossibility[o]) {
-                        otherTeam.count[i].push(currentWinPossibility[o]);
+                if (otherTeam.marks.some(item => currentWinPossibility.includes(item))) {
+                    for (let q = 0; q < otherTeam.marks.length; q++) {
+                        if (otherTeam.marks[q] === currentWinPossibility[o]) {
+                            otherTeam.count[i].push(currentWinPossibility[o]);
+                        }
                     }
                 }
             }
-            if (team.count[i].length > 1) {
-                if (openSpaces.length) {
-                    options.unshift(openSpaces);
-                    break win;
-                }
-            } else if (otherTeam.count[i].length > 1) {
-                if (openSpaces.length) {
-                    options.unshift(openSpaces);
-                }
-            } else if (openSpaces.length > 1 &&
-                team.count[i].some(item => winPossibilities[i].includes(item))) {
+
+            if (team.count[i].length > 1 && openSpaces.length) {
+                options.unshift(openSpaces);
+                break win;
+            } else if (otherTeam.count[i].length > 1 && openSpaces.length) {
+                options.unshift(openSpaces);
+            } else {
+                //finds spots bot could use for win
+                if (openSpaces.length > 1 &&
+                    team.count[i].some(item => currentWinPossibility.includes(item))) {
                     strategicStartingOptions.push(openSpaces);
-                }       
+                }
+                //finds spots other team could use
+                if (otherTeam.marks.some(item => currentWinPossibility.includes(item)) &&
+                    !team.marks.some(item => currentWinPossibility.includes(item))) {
+                    otherTeamSpotsBlock.push(openSpaces);
+                }
+            }
         }
+        for (let u = 0; u < strategicStartingOptions.length; u++) {
+            for (let o = 0; o < otherTeamSpotsBlock.length; o++) {
+                for (let y = 0; y < otherTeamSpotsBlock[o].length; y++) {
+                    let spotNumber = otherTeamSpotsBlock[o][y]
+                    if (strategicStartingOptions[u].includes(spotNumber)) {
+                        offAndDef.push(spotNumber);
+                    }
+                }
+            }
+
+        }
+        console.log(strategicStartingOptions);
+        console.log(otherTeamSpotsBlock);
+        console.log(offAndDef);
         if (!options.length) {
             let choice;
             if (allOpenSpaces.includes(4)) {
@@ -232,8 +255,10 @@ const bot = (function () {
             } else if (otherTeam.marks.includes(4) && openCorners.length) {
                 choice = arrayRandom(openCorners);
             } else if ((otherTeam.marks.includes(0) && otherTeam.marks.includes(8)) ||
-            (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
+                (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
                 choice = arrayRandom(openMiddles);
+            } else if (offAndDef.length) {
+                choice = arrayRandom(offAndDef);
             } else if (strategicStartingOptions.length) {
                 //selects an array from an array of arrays//
                 let preChoice = arrayRandom(strategicStartingOptions);
@@ -244,11 +269,11 @@ const bot = (function () {
             }
             options.push([choice]);
         }
-        function arrayRandom (array) {
-            let randomItem = array[Math.floor(Math.random() * array.length)];
-            return randomItem;
-        }
         return options;
+    }
+    function arrayRandom(array) {
+        let randomItem = array[Math.floor(Math.random() * array.length)];
+        return randomItem;
     }
     function findOpenSpaces(spacesForWin, spacesWeUse, spacesOppUses) {
         let openSpaces = [];
@@ -289,7 +314,7 @@ const endGame = (function () {
             winDisplay.textContent = 'Draw!';
             checkForWin.won = true;
             winDisplay.appendChild(buttonContainer);
-        } 
+        }
         function isIncluded(currentValue) {
             return team.marks.includes(currentValue);
         }
