@@ -189,6 +189,7 @@ const bot = (function () {
     const middleSpaces = [1, 3, 5, 7];
     function computerMove(team, otherTeam) {
         let options = [];
+        let strategicStartingOptions = [];
         let allOpenSpaces = findOpenSpaces(spaces, team.marks, otherTeam.marks);
         let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
         let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
@@ -222,24 +223,33 @@ const bot = (function () {
                 if (openSpaces.length) {
                     options.unshift(openSpaces);
                 }
+            } else if (openSpaces.length > 1 &&
+                team.count[u].some(item => winPossibilities[u].includes(item))) {
+                strategicStartingOptions.push(openSpaces);
             }
         }
         if (!options.length) {
+            let choice;
             if (allOpenSpaces.includes(4)) {
-                options.push([4]);
+                choice = 4;
             } else if (otherTeam.marks.includes(4) && openCorners.length) {
-                let randomCornerSpace = openCorners[Math.floor(Math.random() * openCorners.length)];
-                options.push([randomCornerSpace]);
+                choice = arrayRandom(openCorners);
             } else if ((otherTeam.marks.includes(0) && otherTeam.marks.includes(8)) ||
             (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
-                let randomMiddleSpace = openMiddles[Math.floor(Math.random() * openMiddles.length)];
-                options.push([randomMiddleSpace]);
+                choice = arrayRandom(openMiddles);
+            } else if (strategicStartingOptions.length) {
+                //selects an array from an array of arrays//
+                let preChoice = arrayRandom(strategicStartingOptions);
+                choice = arrayRandom(preChoice);
             }
             else {
-                let randomSpace = allOpenSpaces[Math.floor(Math.random() * allOpenSpaces.length)];
-                options.push([randomSpace]);
+                choice = arrayRandom(allOpenSpaces);
             }
-
+            options.push([choice]);
+        }
+        function arrayRandom (array) {
+            let randomItem = array[Math.floor(Math.random() * array.length)];
+            return randomItem;
         }
         return options;
     }
