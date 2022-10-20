@@ -416,7 +416,7 @@ body {
     transition: 0.5s;
     position: absolute;
     width: 200px;
-    top: calc(54vh + ((var(--cell-size) * 3) / 2) + 100px);
+    top: calc(54vh + ((var(--cell-size) * 3) / 2) + 90px);
     right: 0;
     left: 0;
     margin-right: auto;
