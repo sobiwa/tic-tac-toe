@@ -151,6 +151,18 @@ body {
     top: calc(54vh + ((var(--cell-size) * 3) / 2));
 }
 
+.shout-out {
+    scale: 0;
+    transition: 0.5s;
+    position: absolute;
+    width: 200px;
+    top: calc(54vh + ((var(--cell-size) * 3) / 2) + 80px);
+    right: 0;
+    left: 0;
+    margin-right: auto;
+    margin-left: auto;
+}
+
 .buttons>div {
     display: flex;
     gap: 30px;
@@ -409,16 +421,4 @@ body {
     transform: rotate(-45deg);
     scale: 1.2;
     z-index: 1;
-}
-
-.shout-out {
-    scale: 0;
-    transition: 0.5s;
-    position: absolute;
-    width: 200px;
-    top: calc(54vh + ((var(--cell-size) * 3) / 2) + 90px);
-    right: 0;
-    left: 0;
-    margin-right: auto;
-    margin-left: auto;
 }
