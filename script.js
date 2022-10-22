@@ -191,7 +191,9 @@ const bot = (function () {
         let strategicStartingOptions = [];
         let otherTeamSpotsBlock = [];
         let offAndDef = [];
+        let allOpenWinLines = [];
         let allOpenSpaces = findOpenSpaces(spaces, team.marks, otherTeam.marks);
+        console.log(allOpenSpaces);
         let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
         let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
         const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
@@ -232,6 +234,10 @@ const bot = (function () {
                     !team.marks.some(item => currentWinPossibility.includes(item))) {
                     otherTeamSpotsBlock.push(openSpaces);
                 }
+                //find all fully open win lines
+                if (openSpaces.length > 2) {
+                    allOpenWinLines.push(openSpaces);
+                }
             }
         }
         //compare arrays made above^ for optimal spots
@@ -261,20 +267,33 @@ const bot = (function () {
             if (hasRepeat(mergedOpponentSpots)) {
                 let direDefense = findMostCommon(mergedOpponentSpots);
                 console.log(direDefense);
-                choice = arrayRandom(direDefense);
-            }
-            else if (mostOptimal.length) {
+                let benefit = findSharedItems(direDefense, offAndDef);
+                if (benefit.length) {
+                    console.log(benefit);
+                    choice = arrayRandom(benefit);
+                } else {
+                    choice = arrayRandom(direDefense);
+                }
+            } else if (mostOptimal.length) {
                 choice = arrayRandom(mostOptimal);
-            } else if (offAndDef.length) {
-                console.log(offAndDef);
-                choice = arrayRandom(offAndDef);
             } else if (strategicStartingOptions.length) {
                 //selects an array from an array of arrays//
                 let preChoice = arrayRandom(strategicStartingOptions);
                 choice = arrayRandom(preChoice);
             }
             else {
-                choice = arrayRandom(allOpenSpaces);
+                let strategy = mergeArrayOfArrays(allOpenWinLines);
+                let bestSpots = findMostCommon(strategy);
+                if (bestSpots.length) {
+                    let doubleStrategy = findSharedItems(mergedOpponentSpots, bestSpots);
+                    if (doubleStrategy.length) {
+                        choice = arrayRandom(doubleStrategy);
+                    } else {
+                        choice = arrayRandom(bestSpots);
+                    }
+                } else {
+                    choice = arrayRandom(allOpenSpaces);
+                }
             }
             options.push([choice]);
         }
@@ -328,19 +347,29 @@ const bot = (function () {
             let count = 0;
             for (let p = 0; p < array.length; p++) {
                 if (array[p] === array[i]) {
-                    count++;        
+                    count++;
                 }
             }
             if (count > 1) {
-                repeats++;   
+                repeats++;
             }
         }
         return repeats > 0 ? 1 : 0
     }
 
     function mergeArrayOfArrays(array) {
-        let merged = array.reduce((a,b) => a.concat(b), []);
+        let merged = array.reduce((a, b) => a.concat(b), []);
         return merged;
+    }
+
+    function findSharedItems(array1, array2) {
+        let shared = [];
+        for (let i = 0; i < array1.length; i++) {
+            if (array2.includes(array1[i])) {
+                shared.push(array1[i]);
+            }
+        }
+        return shared;
     }
 
     return { computerMove };
