@@ -244,18 +244,29 @@ const bot = (function () {
                     }
                 }
             }
-
         }
+
+        let mostOptimal = findMostCommon(offAndDef);
+        let mergedOpponentSpots = mergeArrayOfArrays(otherTeamSpotsBlock);
+
         if (!options.length) {
             let choice;
-            if (allOpenSpaces.includes(4)) {
-                choice = 4;
-            } else if (otherTeam.marks.includes(4) && openCorners.length) {
-                choice = arrayRandom(openCorners);
-            } else if ((otherTeam.marks.includes(0) && otherTeam.marks.includes(8)) ||
-                (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
-                choice = arrayRandom(openMiddles);
+            // if (allOpenSpaces.includes(4)) {
+            //     choice = 4; 
+            // } else if (otherTeam.marks.includes(4) && openCorners.length) {
+            //     choice = arrayRandom(openCorners);
+            // } else if ((otherTeam.marks.includes(0) && otherTeam.marks.includes(8)) ||
+            //     (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
+            //     choice = arrayRandom(openMiddles); }
+            if (hasRepeat(mergedOpponentSpots)) {
+                let direDefense = findMostCommon(mergedOpponentSpots);
+                console.log(direDefense);
+                choice = arrayRandom(direDefense);
+            }
+            else if (mostOptimal.length) {
+                choice = arrayRandom(mostOptimal);
             } else if (offAndDef.length) {
+                console.log(offAndDef);
                 choice = arrayRandom(offAndDef);
             } else if (strategicStartingOptions.length) {
                 //selects an array from an array of arrays//
@@ -283,6 +294,55 @@ const bot = (function () {
         }
         return openSpaces;
     }
+
+    function findMostCommon(array) {
+        let highestCount = 0;
+        let mostCommon = array.reduce((a, b) => {
+            let count = 0;
+            if (!a.includes(b)) {
+                for (spot of array) {
+                    if (b === spot) {
+                        count++;
+                    }
+                }
+                if (count > highestCount) {
+                    highestCount = count;
+                    if (!a.length) {
+                        a.push(b);
+                    } else {
+                        a = [];
+                        a.push(b);
+                    }
+                } else if (count === highestCount) {
+                    a.push(b);
+                }
+            }
+            return a;
+        }, []);
+        return mostCommon;
+    }
+
+    function hasRepeat(array) {
+        let repeats = 0;
+        for (let i = 0; i < array.length; i++) {
+            let count = 0;
+            for (let p = 0; p < array.length; p++) {
+                if (array[p] === array[i]) {
+                    count++;        
+                }
+            }
+            if (count > 1) {
+                repeats++;   
+            }
+        }
+        return repeats > 0 ? 1 : 0
+    }
+
+    function mergeArrayOfArrays(array) {
+        let merged = array.reduce((a,b) => a.concat(b), []);
+        return merged;
+    }
+
     return { computerMove };
 })();
 
