@@ -141,18 +141,12 @@ const gameBoard = (function () {
                     if (start.player1.char === "x") {
                         makeMarks(cell, teamX, place);
                         if (!endGame.checkForWin.won) {
-                            let compMove = bot.computerMove(teamO, teamX);
-                            cellArray[compMove[0][0]].classList.add('o');
-                            teamO.marks.push(compMove[0][0]);
-                            endGame.checkForWin(teamO);
+                            moveBot(teamO, teamX)
                         }
                     } else {
                         makeMarks(cell, teamO, place);
                         if (!endGame.checkForWin.won) {
-                            let compMove = bot.computerMove(teamX, teamO);
-                            cellArray[compMove[0][0]].classList.add('x');
-                            teamX.marks.push(compMove[0][0]);
-                            endGame.checkForWin(teamX);
+                            moveBot(teamX, teamO);
                         }
                     }
                 }
@@ -170,6 +164,14 @@ const gameBoard = (function () {
         })
     }
 
+    function moveBot (botTeam, userTeam) {
+        let compMove = bot.computerMove(botTeam, userTeam);
+        // let character = botTeam.character;
+        cellArray[compMove[0][0]].classList.add(botTeam.character);
+        botTeam.marks.push(compMove[0][0]);
+        endGame.checkForWin(botTeam);
+    }
+
     function makeMarks(cell, team, place) {
         cell.classList.add(team.character);
         team.marks.push(place);
@@ -179,7 +181,7 @@ const gameBoard = (function () {
         start.board.classList.remove(team.character);
         start.board.classList.add(oppTeam.character);
     }
-    return { initializeGame, cells, teamX, teamO, }
+    return { initializeGame, cells, teamX, teamO, moveBot }
 })();
 
 const bot = (function () {
@@ -292,7 +294,9 @@ const bot = (function () {
             //     (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
             //     choice = arrayRandom(openMiddles); }
             ///////////////////////////////////////////////////
-            if (hasRepeat(mergedOpponentSpots)) {
+            if (allOpenSpaces.length === 9) {
+                choice = arrayRandom(allOpenSpaces);
+            } else if (hasRepeat(mergedOpponentSpots)) {
                 let direDefense = findMostCommon(mergedOpponentSpots);
                 let benefit = findSharedItems(direDefense, offAndDef);
                 if (benefit.length) {
@@ -300,10 +304,10 @@ const bot = (function () {
                 } else {
                     choice = arrayRandom(direDefense);
                 }
-            } else if (mostOptimal.length) {
-                choice = arrayRandom(mostOptimal);
             } else if (strategicOptionsWithMutual.length) {
                 choice = arrayRandom(strategicOptionsWithMutual);
+            } else if (mostOptimal.length) {
+                choice = arrayRandom(mostOptimal);
             } else if (mergedStrategicOptions.length) {
                 choice = arrayRandom(mergedStrategicOptions);
             }
@@ -431,6 +435,7 @@ const bot = (function () {
 })();
 
 const endGame = (function () {
+    let botTurn = false;
     const shoutOut = document.createElement('div');
     shoutOut.innerText = '@fiufiu win!'
     shoutOut.classList.add('shout-out');
@@ -499,6 +504,16 @@ const endGame = (function () {
         })
         gameBoard.teamX.marks = [];
         gameBoard.teamO.marks = [];
+        if (start.player2.bot) {
+            botTurn = !botTurn;
+            if (botTurn) {
+                if (gameBoard.teamX.player === "player2") {
+                    gameBoard.moveBot(gameBoard.teamX, gameBoard.teamO)
+                } else {
+                    gameBoard.moveBot(gameBoard.teamO, gameBoard.teamX);
+                }
+            }
+        }
     }
-    return { checkForWin }
+    return { checkForWin, botTurn }
 })();
