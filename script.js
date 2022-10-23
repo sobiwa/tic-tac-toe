@@ -184,8 +184,8 @@ const gameBoard = (function () {
 
 const bot = (function () {
     const spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    const cornerSpaces = [0, 2, 6, 8];
-    const middleSpaces = [1, 3, 5, 7];
+    // const cornerSpaces = [0, 2, 6, 8];
+    // const middleSpaces = [1, 3, 5, 7];
     function computerMove(team, otherTeam) {
         let options = [];
         let strategicStartingOptions = [];
@@ -193,9 +193,8 @@ const bot = (function () {
         let offAndDef = [];
         let allOpenWinLines = [];
         let allOpenSpaces = findOpenSpaces(spaces, team.marks, otherTeam.marks);
-        console.log(allOpenSpaces);
-        let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
-        let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
+        // let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
+        // let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
         const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
         win:
         for (let i = 0; i < winPossibilities.length; i++) {
@@ -240,23 +239,51 @@ const bot = (function () {
                 }
             }
         }
-        //compare arrays made above^ for optimal spots
-        for (let u = 0; u < strategicStartingOptions.length; u++) {
-            for (let o = 0; o < otherTeamSpotsBlock.length; o++) {
-                for (let y = 0; y < otherTeamSpotsBlock[o].length; y++) {
-                    let spotNumber = otherTeamSpotsBlock[o][y]
-                    if (strategicStartingOptions[u].includes(spotNumber)) {
-                        offAndDef.push(spotNumber);
+
+        if (!options.length) {
+
+            //compare arrays made above^ for optimal spots
+            for (let u = 0; u < strategicStartingOptions.length; u++) {
+                for (let o = 0; o < otherTeamSpotsBlock.length; o++) {
+                    for (let y = 0; y < otherTeamSpotsBlock[o].length; y++) {
+                        let spotNumber = otherTeamSpotsBlock[o][y]
+                        if (strategicStartingOptions[u].includes(spotNumber)) {
+                            offAndDef.push(spotNumber);
+                        }
                     }
                 }
             }
-        }
 
-        let mostOptimal = findMostCommon(offAndDef);
-        let mergedOpponentSpots = mergeArrayOfArrays(otherTeamSpotsBlock);
+            let mostOptimal = findMostCommon(offAndDef);
+            let mergedOpponentSpots = mergeArrayOfArrays(otherTeamSpotsBlock);
+            let repeatOpponentSpots = findRepeatItems(mergedOpponentSpots);
+            let mergedStrategicOptions = mergeArrayOfArrays(strategicStartingOptions);
+            let mergedOpenWinLines = mergeArrayOfArrays(allOpenWinLines);
 
-        if (!options.length) {
+            //find spaces that will guide other team to win
+            let blacklist = [];
+            for (let k = 0; k < winPossibilities.length; k++) {
+                let openSpaces = findOpenSpaces(winPossibilities[k], team.marks, otherTeam.marks);
+                if (team.count[k].length && openSpaces.length > 1) {
+                    for (let j = 0; j < openSpaces.length; j++) {
+                        let otherOpenSpace = openSpaces.filter(item => item !== openSpaces[j]);
+                        if (otherOpenSpace.some(item => repeatOpponentSpots.includes(item))) {
+                            blacklist.push(openSpaces[j]);
+                        }
+                    }
+                }
+            }
+
+            mergedOpponentSpots = removeBlacklisted(mergedOpponentSpots, blacklist);
+            mostOptimal = removeBlacklisted(mostOptimal, blacklist);
+            mergedStrategicOptions = removeBlacklisted(mergedStrategicOptions, blacklist);
+
+            let strategicOptionsWithMutual = findSharedItems(mergedStrategicOptions, mergedOpenWinLines);
+
+
             let choice;
+            // HERE IS ORIGINAL CODE THAT WAS TOO EXPLICIT / NOT FUN
+            ///////////////////////////////////////////////////
             // if (allOpenSpaces.includes(4)) {
             //     choice = 4; 
             // } else if (otherTeam.marks.includes(4) && openCorners.length) {
@@ -264,33 +291,33 @@ const bot = (function () {
             // } else if ((otherTeam.marks.includes(0) && otherTeam.marks.includes(8)) ||
             //     (otherTeam.marks.includes(2) && otherTeam.marks.includes(6))) {
             //     choice = arrayRandom(openMiddles); }
+            ///////////////////////////////////////////////////
             if (hasRepeat(mergedOpponentSpots)) {
                 let direDefense = findMostCommon(mergedOpponentSpots);
-                console.log(direDefense);
                 let benefit = findSharedItems(direDefense, offAndDef);
                 if (benefit.length) {
-                    console.log(benefit);
                     choice = arrayRandom(benefit);
                 } else {
                     choice = arrayRandom(direDefense);
                 }
             } else if (mostOptimal.length) {
                 choice = arrayRandom(mostOptimal);
-            } else if (strategicStartingOptions.length) {
-                //selects an array from an array of arrays//
-                let preChoice = arrayRandom(strategicStartingOptions);
-                choice = arrayRandom(preChoice);
+            } else if (strategicOptionsWithMutual.length) {
+                choice = arrayRandom(strategicOptionsWithMutual);
+            } else if (mergedStrategicOptions.length) {
+                choice = arrayRandom(mergedStrategicOptions);
             }
             else {
                 let strategy = mergeArrayOfArrays(allOpenWinLines);
                 let bestSpots = findMostCommon(strategy);
                 if (bestSpots.length) {
-                    let doubleStrategy = findSharedItems(mergedOpponentSpots, bestSpots);
-                    if (doubleStrategy.length) {
-                        choice = arrayRandom(doubleStrategy);
-                    } else {
-                        choice = arrayRandom(bestSpots);
-                    }
+                    // let doubleStrategy = findSharedItems(mergedOpponentSpots, bestSpots);
+                    // if (doubleStrategy.length) {
+                    //     choice = arrayRandom(doubleStrategy);
+                    // } else {
+                    //temp
+                    choice = arrayRandom(bestSpots);
+                    // }
                 } else {
                     choice = arrayRandom(allOpenSpaces);
                 }
@@ -299,10 +326,12 @@ const bot = (function () {
         }
         return options;
     }
+
     function arrayRandom(array) {
         let randomItem = array[Math.floor(Math.random() * array.length)];
         return randomItem;
     }
+
     function findOpenSpaces(spacesForWin, spacesWeUse, spacesOppUses) {
         let openSpaces = [];
         for (let t = 0; t < spacesForWin.length; t++) {
@@ -357,6 +386,22 @@ const bot = (function () {
         return repeats > 0 ? 1 : 0
     }
 
+    function findRepeatItems(array) {
+        let repeatItems = [];
+        for (let i = 0; i < array.length; i++) {
+            let count = 0;
+            for (let p = 0; p < array.length; p++) {
+                if (array[p] === array[i]) {
+                    count++;
+                }
+            }
+            if (count > 1 && !repeatItems.includes(array[i])) {
+                repeatItems.push(array[i]);
+            }
+        }
+        return repeatItems;
+    }
+
     function mergeArrayOfArrays(array) {
         let merged = array.reduce((a, b) => a.concat(b), []);
         return merged;
@@ -370,6 +415,16 @@ const bot = (function () {
             }
         }
         return shared;
+    }
+
+    function removeBlacklisted(array, blacklist) {
+        let newArray = []
+        for (let i = 0; i < array.length; i++) {
+            if (!blacklist.includes(array[i])) {
+                newArray.push(array[i]);
+            }
+        }
+        return newArray;
     }
 
     return { computerMove };
