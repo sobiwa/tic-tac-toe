@@ -158,15 +158,15 @@ const gameBoard = (function () {
     }
 
     function moveBot (botTeam, userTeam) {
+        let pre = "pre-" + botTeam.character;
         let compMove = bot.computerMove(botTeam, userTeam);
+        cellArray[compMove[0][0]].classList.add(pre);
         cellArray[compMove[0][0]].classList.add(botTeam.character);
         botTeam.marks.push(compMove[0][0]);
         endGame.checkForWin(botTeam);
     }
 
     function makeMarks(cell, team, place) {
-        // let pre = "pre-" + team.character;
-        // cell.classList.add(pre);
         cell.classList.add(team.character);
         team.marks.push(place);
         endGame.checkForWin(team);

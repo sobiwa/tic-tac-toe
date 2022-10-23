@@ -242,13 +242,6 @@ body {
     border-bottom: none;
 }
 
-.cell.pre-x::before,
-.cell.pre-x::after {
-    content: '';
-    scale: 0;
-    transition: 0.3s;
-}
-
 .cell.x::before,
 .cell.x::after,
 .char.x::before,
