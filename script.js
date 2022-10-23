@@ -117,13 +117,6 @@ const gameBoard = (function () {
         marks: [],
         count: {},
     };
-    if (start.player1.char === "x") {
-        teamX.player = "player1";
-        teamO.player = "player2";
-    } else {
-        teamX.player = "player2";
-        teamO.player = "player1";
-    }
     const cells = document.querySelectorAll(".cell");
     const cellArray = Array.from(cells);
     function initializeGame() {
@@ -166,13 +159,14 @@ const gameBoard = (function () {
 
     function moveBot (botTeam, userTeam) {
         let compMove = bot.computerMove(botTeam, userTeam);
-        // let character = botTeam.character;
         cellArray[compMove[0][0]].classList.add(botTeam.character);
         botTeam.marks.push(compMove[0][0]);
         endGame.checkForWin(botTeam);
     }
 
     function makeMarks(cell, team, place) {
+        // let pre = "pre-" + team.character;
+        // cell.classList.add(pre);
         cell.classList.add(team.character);
         team.marks.push(place);
         endGame.checkForWin(team);
@@ -256,7 +250,9 @@ const bot = (function () {
                 }
             }
 
+            //not actually most optimal as it turns out
             let mostOptimal = findMostCommon(offAndDef);
+            
             let mergedOpponentSpots = mergeArrayOfArrays(otherTeamSpotsBlock);
             let repeatOpponentSpots = findRepeatItems(mergedOpponentSpots);
             let mergedStrategicOptions = mergeArrayOfArrays(strategicStartingOptions);
@@ -277,6 +273,8 @@ const bot = (function () {
             }
 
             mergedOpponentSpots = removeBlacklisted(mergedOpponentSpots, blacklist);
+
+            //not really most optimal
             mostOptimal = removeBlacklisted(mostOptimal, blacklist);
             mergedStrategicOptions = removeBlacklisted(mergedStrategicOptions, blacklist);
 
@@ -507,7 +505,7 @@ const endGame = (function () {
         if (start.player2.bot) {
             botTurn = !botTurn;
             if (botTurn) {
-                if (gameBoard.teamX.player === "player2") {
+                if (start.player1.char === "o") {
                     gameBoard.moveBot(gameBoard.teamX, gameBoard.teamO)
                 } else {
                     gameBoard.moveBot(gameBoard.teamO, gameBoard.teamX);
