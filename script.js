@@ -272,7 +272,6 @@ const bot = (function () {
             let mergedOpenWinLines = mergeArrayOfArrays(allOpenWinLines);
             let mostVersatile = findMostCommon(mergedOpenWinLines);
 
-
             //find spaces that will guide other team to win
             let blacklist = findLeadingSpots(repeatOpponentSpots, team);
 
@@ -329,6 +328,14 @@ const bot = (function () {
                     choice = arrayRandom(ultraMaxOptimal);
                 }
             } else if (maxOptimal.length) {
+                
+                //add potential for setting trap (go diagonal if player chooses center when 
+                //bot starts with corner). Only add to array and random to keep fresh
+                if (mostVersatile.length === 1 &&
+                    mostVersatile[0] !== 4 &&
+                    maxOptimal.every(item => mergedOpenWinLines.includes(item))) {
+                        maxOptimal.push(mostVersatile[0])
+                    }
                 choice = arrayRandom(maxOptimal);
             } else if (strategicOptionsWithMutual.length) {
                 choice = arrayRandom(strategicOptionsWithMutual);
@@ -338,15 +345,13 @@ const bot = (function () {
                 choice = arrayRandom(mergedStrategicOptions);
             }
             else {
-                let strategy = mergeArrayOfArrays(allOpenWinLines);
-                let bestSpots = findMostCommon(strategy);
-                if (bestSpots.length) {
+                if (mostVersatile.length) {
                     // let doubleStrategy = findSharedItems(mergedOpponentSpots, bestSpots);
                     // if (doubleStrategy.length) {
                     //     choice = arrayRandom(doubleStrategy);
                     // } else {
                     //temp
-                    choice = arrayRandom(bestSpots);
+                    choice = arrayRandom(mostVersatile);
                     // }
                 } else {
                     choice = arrayRandom(allOpenSpaces);
