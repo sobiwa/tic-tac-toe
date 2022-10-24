@@ -157,7 +157,7 @@ const gameBoard = (function () {
         })
     }
 
-    function moveBot (botTeam, userTeam) {
+    function moveBot(botTeam, userTeam) {
         let compMove = bot.computerMove(botTeam, userTeam);
         cellArray[compMove[0][0]].classList.add(botTeam.character);
         botTeam.marks.push(compMove[0][0]);
@@ -179,7 +179,7 @@ const gameBoard = (function () {
 const bot = (function () {
     //possible alternate to try
     //give each spots a score denoting cost/benefit analysis
-    
+
     const spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     // const cornerSpaces = [0, 2, 6, 8];
     // const middleSpaces = [1, 3, 5, 7];
@@ -254,7 +254,7 @@ const bot = (function () {
             //not actually most optimal as it turns out
             //array of spots effective on both offense and defense
             let mostOptimal = findMostCommon(offAndDef);
-            
+
             //array of spots opponent can use to win
             let mergedOpponentSpots = mergeArrayOfArrays(otherTeamSpotsBlock);
 
@@ -282,7 +282,7 @@ const bot = (function () {
                     }
                 }
             }
-            
+
             //filtered array of spots opponent can use to win
             mergedOpponentSpots = removeBlacklisted(mergedOpponentSpots, blacklist);
 
@@ -293,7 +293,7 @@ const bot = (function () {
 
             //filtered array of spots bot can fill to win if already filled one spot of line
             mergedStrategicOptions = removeBlacklisted(mergedStrategicOptions, blacklist);
-            
+
             //spots in lines bot is already started on that share another possible win line
             let strategicOptionsWithMutual = findSharedItems(mergedStrategicOptions, mergedOpenWinLines);
 
@@ -302,7 +302,6 @@ const bot = (function () {
             console.log(maxOptimal);
 
             let ultraMaxOptimal = findSharedItems(maxOptimal, mostVersatile);
-
 
             let choice;
             // HERE IS ORIGINAL CODE THAT WAS TOO EXPLICIT / NOT FUN
@@ -326,7 +325,40 @@ const bot = (function () {
                     choice = arrayRandom(direDefense);
                 }
             } else if (ultraMaxOptimal.length) {
-                choice = arrayRandom(ultraMaxOptimal);
+
+                //need opponent spots that will lead bot to ultraMaxOptimal (4)
+                let trap = [];
+                for (let k = 0; k < winPossibilities.length; k++) {
+                    let openSpaces = findOpenSpaces(winPossibilities[k], team.marks, otherTeam.marks);
+                    if (otherTeam.count[k].length && openSpaces.length > 1) {
+                        for (let j = 0; j < openSpaces.length; j++) {
+                            let otherOpenSpace = openSpaces.filter(item => item !== openSpaces[j]);
+                            if (otherOpenSpace.some(item => ultraMaxOptimal.includes(item))) {
+                                trap.push(openSpaces[j]);
+                            }
+                        }
+                    }
+                }
+
+                //^need spots that will lead opponent to these spots
+                let trapPhase2 = [];
+                for (let k = 0; k < winPossibilities.length; k++) {
+                    let openSpaces = findOpenSpaces(winPossibilities[k], team.marks, otherTeam.marks);
+                    if (team.count[k].length && openSpaces.length > 1) {
+                        for (let j = 0; j < openSpaces.length; j++) {
+                            let otherOpenSpace = openSpaces.filter(item => item !== openSpaces[j]);
+                            if (otherOpenSpace.some(item => trap.includes(item))) {
+                                trapPhase2.push(openSpaces[j]);
+                            }
+                        }
+                    }
+                }
+
+                if (trapPhase2.length) {
+                    choice = arrayRandom(trapPhase2);
+                } else {
+                    choice = arrayRandom(ultraMaxOptimal);
+                }
             } else if (maxOptimal.length) {
                 choice = arrayRandom(maxOptimal);
             } else if (strategicOptionsWithMutual.length) {
