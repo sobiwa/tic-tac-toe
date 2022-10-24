@@ -158,9 +158,7 @@ const gameBoard = (function () {
     }
 
     function moveBot (botTeam, userTeam) {
-        let pre = "pre-" + botTeam.character;
         let compMove = bot.computerMove(botTeam, userTeam);
-        cellArray[compMove[0][0]].classList.add(pre);
         cellArray[compMove[0][0]].classList.add(botTeam.character);
         botTeam.marks.push(compMove[0][0]);
         endGame.checkForWin(botTeam);
@@ -251,11 +249,19 @@ const bot = (function () {
             }
 
             //not actually most optimal as it turns out
+            //array of spots effective on both offense and defense
             let mostOptimal = findMostCommon(offAndDef);
             
+            //array of spots opponent can use to win
             let mergedOpponentSpots = mergeArrayOfArrays(otherTeamSpotsBlock);
+
+            //array of spots opponent can use to win in multiple ways
             let repeatOpponentSpots = findRepeatItems(mergedOpponentSpots);
+
+            //array of spots bot can fill to win if already filled one spot of line
             let mergedStrategicOptions = mergeArrayOfArrays(strategicStartingOptions);
+
+            //all open lines of 3 to win
             let mergedOpenWinLines = mergeArrayOfArrays(allOpenWinLines);
 
             //find spaces that will guide other team to win
@@ -271,14 +277,24 @@ const bot = (function () {
                     }
                 }
             }
-
+            
+            //filtered array of spots opponent can use to win
             mergedOpponentSpots = removeBlacklisted(mergedOpponentSpots, blacklist);
 
             //not really most optimal
+            //filtered array of spots effective on both offense and defense
             mostOptimal = removeBlacklisted(mostOptimal, blacklist);
-            mergedStrategicOptions = removeBlacklisted(mergedStrategicOptions, blacklist);
+            console.log(mostOptimal);
 
+            //filtered array of spots bot can fill to win if already filled one spot of line
+            mergedStrategicOptions = removeBlacklisted(mergedStrategicOptions, blacklist);
+            
+            //spots in lines bot is already started on that share another possible win line
             let strategicOptionsWithMutual = findSharedItems(mergedStrategicOptions, mergedOpenWinLines);
+
+            //^^but also serve as defense
+            let maxOptimal = findSharedItems(strategicOptionsWithMutual, mostOptimal);
+            console.log(maxOptimal);
 
 
             let choice;
@@ -294,7 +310,7 @@ const bot = (function () {
             ///////////////////////////////////////////////////
             if (allOpenSpaces.length === 9) {
                 choice = arrayRandom(allOpenSpaces);
-            } else if (hasRepeat(mergedOpponentSpots)) {
+            } else if (repeatOpponentSpots.length) {
                 let direDefense = findMostCommon(mergedOpponentSpots);
                 let benefit = findSharedItems(direDefense, offAndDef);
                 if (benefit.length) {
@@ -302,6 +318,8 @@ const bot = (function () {
                 } else {
                     choice = arrayRandom(direDefense);
                 }
+            } else if (maxOptimal.length) {
+                choice = arrayRandom(maxOptimal);
             } else if (strategicOptionsWithMutual.length) {
                 choice = arrayRandom(strategicOptionsWithMutual);
             } else if (mostOptimal.length) {

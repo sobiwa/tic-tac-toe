@@ -255,7 +255,6 @@ body {
     transition: 0.3s;
 }
 
-
 .cell.x::before,
 .char.x::before,
 .winning-character.x::before {
