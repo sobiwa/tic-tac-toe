@@ -180,6 +180,7 @@ const bot = (function () {
     //possible alternate to try
     //give each spots a score denoting cost/benefit analysis
 
+    const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
     const spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     // const cornerSpaces = [0, 2, 6, 8];
     // const middleSpaces = [1, 3, 5, 7];
@@ -190,12 +191,15 @@ const bot = (function () {
         let offAndDef = [];
         let allOpenWinLines = [];
         let allOpenSpaces = findOpenSpaces(spaces, team.marks, otherTeam.marks);
-        // let openCorners = findOpenSpaces(cornerSpaces, team.marks, otherTeam.marks);
-        // let openMiddles = findOpenSpaces(middleSpaces, team.marks, otherTeam.marks);
-        const winPossibilities = [[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 4, 8], [2, 4, 6]];
+        let opensInEachLine = [];
+        for (let i = 0; i < winPossibilities.length; i++) {
+            let opens = findOpenSpaces(winPossibilities[i], team.marks, otherTeam.marks);
+            opensInEachLine.push(opens);
+        }
+
         win:
         for (let i = 0; i < winPossibilities.length; i++) {
-            let openSpaces = findOpenSpaces(winPossibilities[i], team.marks, otherTeam.marks);
+            let openSpaces = opensInEachLine[i];
             let currentWinPossibility = winPossibilities[i];
             team.count[i] = [];
             otherTeam.count[i] = [];
@@ -270,18 +274,7 @@ const bot = (function () {
 
 
             //find spaces that will guide other team to win
-            let blacklist = [];
-            for (let k = 0; k < winPossibilities.length; k++) {
-                let openSpaces = findOpenSpaces(winPossibilities[k], team.marks, otherTeam.marks);
-                if (team.count[k].length && openSpaces.length > 1) {
-                    for (let j = 0; j < openSpaces.length; j++) {
-                        let otherOpenSpace = openSpaces.filter(item => item !== openSpaces[j]);
-                        if (otherOpenSpace.some(item => repeatOpponentSpots.includes(item))) {
-                            blacklist.push(openSpaces[j]);
-                        }
-                    }
-                }
-            }
+            let blacklist = findLeadingSpots(repeatOpponentSpots, team);
 
             //filtered array of spots opponent can use to win
             mergedOpponentSpots = removeBlacklisted(mergedOpponentSpots, blacklist);
@@ -289,7 +282,6 @@ const bot = (function () {
             //not really most optimal
             //filtered array of spots effective on both offense and defense
             mostOptimal = removeBlacklisted(mostOptimal, blacklist);
-            console.log(mostOptimal);
 
             //filtered array of spots bot can fill to win if already filled one spot of line
             mergedStrategicOptions = removeBlacklisted(mergedStrategicOptions, blacklist);
@@ -299,7 +291,6 @@ const bot = (function () {
 
             //^^but also serve as defense
             let maxOptimal = findSharedItems(strategicOptionsWithMutual, mostOptimal);
-            console.log(maxOptimal);
 
             let ultraMaxOptimal = findSharedItems(maxOptimal, mostVersatile);
 
@@ -327,32 +318,10 @@ const bot = (function () {
             } else if (ultraMaxOptimal.length) {
 
                 //need opponent spots that will lead bot to ultraMaxOptimal (4)
-                let trap = [];
-                for (let k = 0; k < winPossibilities.length; k++) {
-                    let openSpaces = findOpenSpaces(winPossibilities[k], team.marks, otherTeam.marks);
-                    if (otherTeam.count[k].length && openSpaces.length > 1) {
-                        for (let j = 0; j < openSpaces.length; j++) {
-                            let otherOpenSpace = openSpaces.filter(item => item !== openSpaces[j]);
-                            if (otherOpenSpace.some(item => ultraMaxOptimal.includes(item))) {
-                                trap.push(openSpaces[j]);
-                            }
-                        }
-                    }
-                }
+                let trap = findLeadingSpots(ultraMaxOptimal, otherTeam);
 
                 //^need spots that will lead opponent to these spots
-                let trapPhase2 = [];
-                for (let k = 0; k < winPossibilities.length; k++) {
-                    let openSpaces = findOpenSpaces(winPossibilities[k], team.marks, otherTeam.marks);
-                    if (team.count[k].length && openSpaces.length > 1) {
-                        for (let j = 0; j < openSpaces.length; j++) {
-                            let otherOpenSpace = openSpaces.filter(item => item !== openSpaces[j]);
-                            if (otherOpenSpace.some(item => trap.includes(item))) {
-                                trapPhase2.push(openSpaces[j]);
-                            }
-                        }
-                    }
-                }
+                let trapPhase2 = findLeadingSpots(trap, team);
 
                 if (trapPhase2.length) {
                     choice = arrayRandom(trapPhase2);
@@ -385,6 +354,24 @@ const bot = (function () {
             }
             options.push([choice]);
         }
+
+        //finds part of the win line that is not target spot
+        function findLeadingSpots(array, team) {
+            let newArray = [];
+            for (let k = 0; k < winPossibilities.length; k++) {
+                let openSpaces = opensInEachLine[k];
+                if (team.count[k].length && openSpaces.length > 1) {
+                    for (let j = 0; j < openSpaces.length; j++) {
+                        let otherOpenSpace = openSpaces.filter(item => item !== openSpaces[j]);
+                        if (otherOpenSpace.some(item => array.includes(item))) {
+                            newArray.push(openSpaces[j]);
+                        }
+                    }
+                }
+            }
+            return newArray
+        }
+
         return options;
     }
 
