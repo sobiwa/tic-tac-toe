@@ -177,6 +177,9 @@ const gameBoard = (function () {
 })();
 
 const bot = (function () {
+    //possible alternate to try
+    //give each spots a score denoting cost/benefit analysis
+    
     const spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     // const cornerSpaces = [0, 2, 6, 8];
     // const middleSpaces = [1, 3, 5, 7];
@@ -263,6 +266,8 @@ const bot = (function () {
 
             //all open lines of 3 to win
             let mergedOpenWinLines = mergeArrayOfArrays(allOpenWinLines);
+            let mostVersatile = findMostCommon(mergedOpenWinLines);
+
 
             //find spaces that will guide other team to win
             let blacklist = [];
@@ -296,6 +301,8 @@ const bot = (function () {
             let maxOptimal = findSharedItems(strategicOptionsWithMutual, mostOptimal);
             console.log(maxOptimal);
 
+            let ultraMaxOptimal = findSharedItems(maxOptimal, mostVersatile);
+
 
             let choice;
             // HERE IS ORIGINAL CODE THAT WAS TOO EXPLICIT / NOT FUN
@@ -318,6 +325,8 @@ const bot = (function () {
                 } else {
                     choice = arrayRandom(direDefense);
                 }
+            } else if (ultraMaxOptimal.length) {
+                choice = arrayRandom(ultraMaxOptimal);
             } else if (maxOptimal.length) {
                 choice = arrayRandom(maxOptimal);
             } else if (strategicOptionsWithMutual.length) {
