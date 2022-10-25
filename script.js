@@ -138,6 +138,7 @@ const gameBoard = (function () {
                         }
                     } else {
                         makeMarks(cell, teamO, place);
+                        console.log(place);
                         if (!endGame.checkForWin.won) {
                             moveBot(teamX, teamO);
                         }
@@ -161,6 +162,7 @@ const gameBoard = (function () {
         let compMove = bot.computerMove(botTeam, userTeam);
         cellArray[compMove[0][0]].classList.add(botTeam.character);
         botTeam.marks.push(compMove[0][0]);
+        console.log(compMove[0][0]);
         endGame.checkForWin(botTeam);
     }
 
@@ -268,6 +270,9 @@ const bot = (function () {
             //array of spots bot can fill to win if already filled one spot of line
             let mergedStrategicOptions = mergeArrayOfArrays(strategicStartingOptions);
 
+            //array of spots bot can use for win in multiple ways
+            let repeatBotSpots = findRepeatItems(mergedStrategicOptions);
+
             //all open lines of 3 to win
             let mergedOpenWinLines = mergeArrayOfArrays(allOpenWinLines);
             let mostVersatile = findMostCommon(mergedOpenWinLines);
@@ -306,10 +311,15 @@ const bot = (function () {
             ///////////////////////////////////////////////////
             if (allOpenSpaces.length === 9) {
                 choice = arrayRandom(allOpenSpaces);
+            } else if (repeatBotSpots.length) {
+                choice = arrayRandom(repeatBotSpots)
             } else if (repeatOpponentSpots.length) {
                 let direDefense = findMostCommon(mergedOpponentSpots);
                 let benefit = findSharedItems(direDefense, offAndDef);
-                if (benefit.length) {
+                let maxBenefit = findSharedItems(benefit, mostVersatile);
+                if (maxBenefit.length) {
+                    choice = arrayRandom(maxBenefit);
+                } else if (benefit.length) {
                     choice = arrayRandom(benefit);
                 } else {
                     choice = arrayRandom(direDefense);
@@ -328,14 +338,14 @@ const bot = (function () {
                     choice = arrayRandom(ultraMaxOptimal);
                 }
             } else if (maxOptimal.length) {
-                
+
                 //add potential for setting trap (go diagonal if player chooses center when 
                 //bot starts with corner). Only add to array and random to keep fresh
                 if (mostVersatile.length === 1 &&
                     mostVersatile[0] !== 4 &&
                     maxOptimal.every(item => mergedOpenWinLines.includes(item))) {
-                        maxOptimal.push(mostVersatile[0])
-                    }
+                    maxOptimal.push(mostVersatile[0])
+                }
                 choice = arrayRandom(maxOptimal);
             } else if (strategicOptionsWithMutual.length) {
                 choice = arrayRandom(strategicOptionsWithMutual);
@@ -346,13 +356,7 @@ const bot = (function () {
             }
             else {
                 if (mostVersatile.length) {
-                    // let doubleStrategy = findSharedItems(mergedOpponentSpots, bestSpots);
-                    // if (doubleStrategy.length) {
-                    //     choice = arrayRandom(doubleStrategy);
-                    // } else {
-                    //temp
                     choice = arrayRandom(mostVersatile);
-                    // }
                 } else {
                     choice = arrayRandom(allOpenSpaces);
                 }
